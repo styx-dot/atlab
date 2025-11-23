@@ -1,4 +1,4 @@
-FROM jenkins/inbound-agent:latest-jdk21
+FROM docker.io/jenkins/inbound-agent:latest
 
 USER root
 
@@ -10,25 +10,29 @@ RUN set -eux; \
     apt-get install -y --no-install-recommends \
         ca-certificates \
         curl \
+	wget \
         unzip \
         jq \
         python3 \
         groff \
         less \
         awscli \
-        gnupg \
-        software-properties-common; \
+        gnupg; \
     \
-    # Add HashiCorp APT repo + key
-    wget -O- https://apt.releases.hashicorp.com/gpg | \
-      gpg --dearmor -o /usr/share/keyrings/hashicorp-archive-keyring.gpg; \
-    echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/hashicorp-archive-keyring.gpg] https://apt.releases.hashicorp.com $(. /etc/os-release && echo \"$UBUNTU_CODENAME\") main" \
+    # Add HashiCorp repo for Debian
+    wget -O- https://apt.releases.hashicorp.com/gpg \
+      | gpg --dearmor \
+      > /usr/share/keyrings/hashicorp-archive-keyring.gpg; \
+    \
+    echo "deb [signed-by=/usr/share/keyrings/hashicorp-archive-keyring.gpg] \
+    https://apt.releases.hashicorp.com $(. /etc/os-release && echo \"$VERSION_CODENAME\") main" \
       > /etc/apt/sources.list.d/hashicorp.list; \
     \
     apt-get update; \
     apt-get install -y terraform; \
     \
     rm -rf /var/lib/apt/lists/*
+
 
 # --- Custom CA for Bitbucket / MinIO / internal services ---
 COPY ../../certs/atlab-rootCA.crt /usr/local/share/ca-certificates/atlab-rootCA.crt
@@ -49,7 +53,6 @@ ENV TF_PLUGIN_CACHE_DIR="/home/jenkins/.terraform.d/plugin-cache"
 RUN mkdir -p /home/jenkins/.terraform.d/plugin-cache && \
     chown -R jenkins:jenkins /home/jenkins/.terraform.d
 
-# QoL
 ENV AWS_PAGER=""
 
 USER jenkins
