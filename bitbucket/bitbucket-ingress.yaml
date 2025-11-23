@@ -1,0 +1,25 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: bitbucket
+  namespace: bitbucket
+  annotations:
+    kubernetes.io/ingress.class: traefik
+spec:
+  ingressClassName: traefik
+  rules:
+  - host: bitbucket.at-lab.lab
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: bitbucket
+            port:
+              number: 7990
+  tls:
+  - hosts:
+    - bitbucket.at-lab.lab
+    secretName: wildcard-atlab-tls
+

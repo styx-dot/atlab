@@ -1,0 +1,95 @@
+controller:
+
+  initContainerEnv:
+    - name: HOME
+      value: /var/jenkins_home
+  
+  image:
+    registry: registry.at-lab.lab
+    repository: jenkins-cafix
+    tag: "v1"
+    pullPolicy: IfNotPresent
+
+  runAsUser: 0
+  containerSecurityContext:
+    runAsUser: 0
+    allowPrivilegeEscalation: true
+    privileged: true
+    readOnlyRootFilesystem: false
+
+  podSecurityContext:
+    fsGroup: 0
+
+  admin:
+    username: admin
+    password: admin
+
+  ingress:
+    enabled: true
+    hostName: jenkins.at-lab.lab
+    annotations: {}
+    tls:
+      - secretName: wildcard-atlab-tls
+        hosts:
+          - jenkins.at-lab.lab
+
+  lifecycle:
+    postStart:
+      exec:
+        command:
+          - /bin/sh
+          - -c
+          - |
+            CERT="/usr/local/share/ca-certificates/custom/atlab-rootCA.crt"
+
+            update-ca-certificates
+
+            keytool -list -cacerts -storepass changeit 2>/dev/null | grep -qi atlab-rootCA || \
+              keytool -importcert -noprompt \
+                -alias atlab-rootCA \
+                -file "$CERT" \
+                -cacerts \
+                -storepass changeit
+
+            mkdir -p /tmp/run && chown jenkins:jenkins /tmp/run
+
+
+  Volumes:
+    - name: custom-ca
+      configMap:
+        name: jenkins-ca-cert
+
+  additionalVolumeMounts: 
+    - name: custom-ca
+      mountPath: /usr/local/share/ca-certificates/custom
+      readOnly: true
+  
+  JCasC:
+    configScripts:
+      terraform-agent: |
+        jenkins:
+          clouds:
+            - kubernetes:
+                name: "kubernetes"
+                jenkinsUrl: "http://jenkins.jenkins.svc.cluster.local:8080"
+                webSocket: true
+                templates:
+                  - name: "terra-agent"
+                    label: "terra-agent"
+                    namespace: "jenkins"
+                    idleMinutes: 5
+                    serviceAccount: "jenkins"
+                    containers:
+                      - name: "terraform"
+                        image: "registry.at-lab.lab/terraform:1.5.7"
+                        ttyEnabled: true
+                        command: "sleep"
+                        args: "infinity"
+                        privileged: false
+                        workingDir: "/workspace"
+
+
+persistence:
+  enabled: true
+  size: 20Gi
+

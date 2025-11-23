@@ -1,0 +1,58 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: bitbucket
+  namespace: bitbucket
+spec:
+  serviceName: bitbucket
+  replicas: 1
+  selector:
+    matchLabels:
+      app: bitbucket
+  template:
+    metadata:
+      labels:
+        app: bitbucket
+    spec:
+      containers:
+      - name: bitbucket
+        image: atlassian/bitbucket-server:8.16.1
+        ports:
+        - containerPort: 7990
+        - containerPort: 7999
+        volumeMounts:
+        - name: bitbucket-home
+          mountPath: /var/atlassian/application-data/bitbucket
+        resources:
+          requests:
+            memory: "3Gi"
+            cpu: "500m"
+          limits:
+            memory: "4Gi"
+            cpu: "1"
+  volumeClaimTemplates:
+  - metadata:
+      name: bitbucket-home
+    spec:
+      accessModes: ["ReadWriteOnce"]
+      resources:
+        requests:
+          storage: 20Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: bitbucket
+  namespace: bitbucket
+spec:
+  type: ClusterIP
+  ports:
+  - name: http
+    port: 7990
+    targetPort: 7990
+  - name: ssh
+    port: 7999
+    targetPort: 7999
+  selector:
+    app: bitbucket
+
