@@ -2,8 +2,11 @@ FROM jenkins/inbound-agent:latest-jdk21
 
 USER root
 
-# --- Base tools + deps for terraform/awscli ---
-RUN apt-get update && \
+ENV DEBIAN_FRONTEND=noninteractive
+
+# --- Base tools + AWS CLI + Terraform from HashiCorp apt repo ---
+RUN set -eux; \
+    apt-get update; \
     apt-get install -y --no-install-recommends \
         ca-certificates \
         curl \
@@ -13,33 +16,41 @@ RUN apt-get update && \
         groff \
         less \
         awscli \
-    && rm -rf /var/lib/apt/lists/*
+        gnupg \
+        software-properties-common; \
+    \
+    # Add HashiCorp APT repo + key
+    wget -O- https://apt.releases.hashicorp.com/gpg | \
+      gpg --dearmor -o /usr/share/keyrings/hashicorp-archive-keyring.gpg; \
+    echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/hashicorp-archive-keyring.gpg] https://apt.releases.hashicorp.com $(. /etc/os-release && echo \"$UBUNTU_CODENAME\") main" \
+      > /etc/apt/sources.list.d/hashicorp.list; \
+    \
+    apt-get update; \
+    apt-get install -y terraform; \
+    \
+    rm -rf /var/lib/apt/lists/*
 
-# --- Custom CA for Bitbucket / MinIO / etc. ---
-COPY ./certs/atlab-rootCA.crt /usr/local/share/ca-certificates/atlab-rootCA.crt
+# --- Custom CA for Bitbucket / MinIO / internal services ---
+COPY ../../certs/atlab-rootCA.crt /usr/local/share/ca-certificates/atlab-rootCA.crt
 
 RUN chmod 644 /usr/local/share/ca-certificates/atlab-rootCA.crt && \
     update-ca-certificates
 
-# Also import CA into JVM truststore (for Java HTTPS, incl. Jenkins remoting if needed)
+# --- Import CA into JVM truststore ---
 RUN keytool -importcert -noprompt \
       -alias atlab-rootCA \
       -file /usr/local/share/ca-certificates/atlab-rootCA.crt \
       -keystore "$JAVA_HOME/lib/security/cacerts" \
       -storepass changeit || true
 
-# --- Terraform CLI ---
-ARG TERRAFORM_VERSION=1.9.5
+# --- Terraform plugin cache (fixes warnings) ---
+ENV TF_PLUGIN_CACHE_DIR="/home/jenkins/.terraform.d/plugin-cache"
 
-RUN curl -fsSL "https://releases.hashicorp.com/terraform/${TERRAFORM_VERSION}/terraform_${TERRAFORM_VERSION}_linux_amd64.zip" \
-      -o /tmp/terraform.zip && \
-    unzip /tmp/terraform.zip -d /usr/local/bin && \
-    chmod +x /usr/local/bin/terraform && \
-    rm /tmp/terraform.zip
+RUN mkdir -p /home/jenkins/.terraform.d/plugin-cache && \
+    chown -R jenkins:jenkins /home/jenkins/.terraform.d
 
 # QoL
 ENV AWS_PAGER=""
-ENV TF_PLUGIN_CACHE_DIR="/.terraform.d/plugin-cache"
 
 USER jenkins
 
