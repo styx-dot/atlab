@@ -1,0 +1,19 @@
+global:
+  # Set the prefix used for all resources in the Helm chart. If not set,
+  # the prefix will be `<helm release name>`.
+  name: "registry-ui"
+
+ui:
+  service:
+    type: ClusterIP
+
+  ingress:
+    enabled: true
+    ingressClassName: traefik
+    host: registry.at-lab.lab
+    
+    tls:
+      - secretName: wildcard-atlab-tls
+        hosts:
+          - registry.at-lab.lab
+

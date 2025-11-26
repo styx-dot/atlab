@@ -1,0 +1,48 @@
+{
+   "class": "AS3",
+   "action": "deploy",
+   "persist": true,
+   "declaration": {
+		"class": "ADC",
+		"schemaVersion": "3.53.0",
+		"SCM001": {
+			"class": "Tenant",
+			"app_10.0.0.1_80": {
+				"class": "Application",
+				"vs_10.0.0.1_80": {
+					"class": "Service_HTTP",
+					"remark": "AT-TEST-AS3",
+					"layer4": "tcp",
+					"pool": "p_10.0.0.1_80",
+					"translateServerAddress": true,
+					"translateServerPort": true,
+					"virtualPort": 80,
+					"virtualAddresses": [ 
+						"10.0.0.3"
+					],
+					"snat": "auto"
+				},
+				"p_10.0.0.1_80": {
+					"class": "Pool",
+					"members": [
+						{
+							"servicePort": 80,
+							"serverAddresses": [
+								"10.1.0.1"
+							],
+							"shareNodes": true
+						},
+						{
+							"servicePort": 80,
+							"serverAddresses": [
+								"10.1.0.2"
+							],
+							"shareNodes": true
+						}
+					]
+				}
+							
+			} 
+		}
+	}
+}

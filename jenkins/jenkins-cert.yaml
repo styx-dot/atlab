@@ -1,0 +1,13 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: jenkins-atlab
+  namespace: jenkins
+spec:
+  secretName: wildcard-atlab-tls
+  dnsNames:
+    - jenkins.at-lab.lab
+  issuerRef:
+    name: atlab-ca
+    kind: ClusterIssuer
+

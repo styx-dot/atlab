@@ -1,0 +1,22 @@
+replicaCount: 1
+
+persistence:
+  enabled: true
+  size: 10Gi
+  storageClass: ""
+
+service:
+  type: ClusterIP
+  port: 5000
+
+ingress:
+  enabled: enable
+  className: "traefik"
+  path: /v2/
+  hosts:
+    - registry.at-lab.lab
+  tls:
+    - secretName: wildcard-atlab-tls
+      hosts:
+        - registry.at-lab.lab
+

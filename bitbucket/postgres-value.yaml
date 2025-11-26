@@ -1,0 +1,15 @@
+USER-SUPPLIED VALUES:
+auth:
+  database: bitbucket
+  password: bitbucketpwd
+  postgresPassword: bitbucketpwd
+  username: bitbucket
+primary:
+  resources:
+    requests:
+      cpu: 250m
+      memory: 1Gi
+    limits:
+      cpu: 1
+      memory: 2Gi
+

@@ -1,0 +1,13 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: registry-atlab
+  namespace: registry
+spec:
+  secretName: wildcard-atlab-tls
+  dnsNames:
+    - registry.at-lab.lab
+  issuerRef:
+    name: atlab-ca
+    kind: ClusterIssuer
+

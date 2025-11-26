@@ -1,0 +1,14 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: bigip01-mgmt-cert
+  namespace: cert-manager
+spec:
+  secretName: bigip01-mgmt-tls
+  commonName: bigip01.at-lab.lab
+  dnsNames:
+    - bigip01.at-lab.lab
+  issuerRef:
+    name: atlab-ca
+    kind: ClusterIssuer
+

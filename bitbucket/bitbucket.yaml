@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
       - name: bitbucket
-        image: atlassian/bitbucket-server:8.16.1
+        image: registry.at-lab.lab/bitbucket/bitbucket:v1.0.0
         ports:
         - containerPort: 7990
         - containerPort: 7999
