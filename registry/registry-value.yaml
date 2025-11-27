@@ -20,3 +20,22 @@ ingress:
       hosts:
         - registry.at-lab.lab
 
+# -------------------------------
+# REQUIRED FOR DELETE SUPPORT
+# -------------------------------
+configData:
+  version: 0.1
+  log:
+    fields:
+      service: registry
+  storage:
+    cache:
+      blobdescriptor: inmemory
+    filesystem:
+      rootdirectory: /var/lib/registry
+    delete:
+      enabled: true          # <--- THIS ENABLES DELETE
+  http:
+    addr: :5000
+    headers:
+      X-Content-Type-Options: [nosniff]

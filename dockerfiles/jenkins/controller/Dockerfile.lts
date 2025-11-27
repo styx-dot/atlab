@@ -17,8 +17,6 @@ RUN set -eux; \
         jq \
         curl \
         bash; \
-    which jq; \
-    jq --version; \
     rm -rf /var/lib/apt/lists/*
 
 RUN mkdir -p /etc/containers && \
@@ -32,18 +30,38 @@ RUN mkdir -p /etc/containers && \
       'mount_program = ""' \
       > /etc/containers/storage.conf
 
-# --- Add and trust atlab-rootCA on OS level ---
+# --- Add CA ---
 COPY ./certs/atlab-rootCA.crt /usr/local/share/ca-certificates/atlab-rootCA.crt
 
 RUN chmod 644 /usr/local/share/ca-certificates/atlab-rootCA.crt && \
     update-ca-certificates
 
-# --- Import CA into JVM truststore for Jenkins / plugins / Git over HTTPS ---
+# --- Add CA to JVM ---
 RUN keytool -importcert -noprompt \
       -alias atlab-rootCA \
       -file /usr/local/share/ca-certificates/atlab-rootCA.crt \
       -keystore "$JAVA_HOME/lib/security/cacerts" \
       -storepass changeit || true
+
+# ---------------------------------------------------
+# Install Jenkins Plugin Manager manually
+# ---------------------------------------------------
+# Install Jenkins Plugin Manager
+RUN curl -L -o /usr/local/bin/jenkins-plugin-manager.jar \
+        https://github.com/jenkinsci/plugin-installation-manager-tool/releases/download/2.12.5/jenkins-plugin-manager-2.12.5.jar && \
+    chmod 755 /usr/local/bin/jenkins-plugin-manager.jar
+
+# Copy plugin list
+COPY dockerfiles/jenkins/controller/plugins.txt /usr/share/jenkins/ref/plugins.txt
+
+# Create plugin directory
+RUN mkdir -p /usr/share/jenkins/ref/plugins
+
+# Install plugins (NEW syntax)
+RUN java -jar /usr/local/bin/jenkins-plugin-manager.jar \
+        --plugin-file /usr/share/jenkins/ref/plugins.txt \
+        --plugin-download-directory /usr/share/jenkins/ref/plugins \
+        --verbose
 
 USER jenkins
 

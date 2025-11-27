@@ -1,4 +1,6 @@
 controller:
+  installPlugins: false
+  overwritePlugins: true
 
   initContainerEnv:
     - name: HOME
@@ -7,7 +9,7 @@ controller:
   image:
     registry: registry.at-lab.lab
     repository: jenkins/controller
-    tag: "v1.0.0"
+    tag: "v2.0.1"
     pullPolicy: IfNotPresent
 
   runAsUser: 0

@@ -4,6 +4,8 @@ global:
   name: "registry-ui"
 
 ui:
+  deleteImages: true
+
   service:
     type: ClusterIP
 

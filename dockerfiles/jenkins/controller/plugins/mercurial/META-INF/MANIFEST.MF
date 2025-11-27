@@ -1,0 +1,29 @@
+Manifest-Version: 1.0
+Created-By: Maven Archiver 3.6.3
+Build-Jdk-Spec: 17
+Specification-Title: Jenkins Mercurial plugin
+Specification-Version: 0.0
+Implementation-Title: Jenkins Mercurial plugin
+Implementation-Version: 1323.ve69d2a_db_8a_b_d
+Group-Id: org.jenkins-ci.plugins
+Artifact-Id: mercurial
+Short-Name: mercurial
+Long-Name: Jenkins Mercurial plugin
+Url: https://github.com/jenkinsci/mercurial-plugin
+Compatible-Since-Version: 2.0
+Plugin-Version: 1323.ve69d2a_db_8a_b_d
+Hudson-Version: 2.479.3
+Jenkins-Version: 2.479.3
+Plugin-Dependencies: commons-lang3-api:3.18.0-98.v3a_674c06072d,credenti
+ als:1415.v831096eb_5534,jsch:0.2.16-95.v3eecb_55fa_b_78,matrix-project:
+ 849.v0cd64ed7e531,scm-api:704.v3ce5c542825a_,ssh-credentials:359.v2191c
+ 4cf635f
+Plugin-Developers: 
+Plugin-License-Name: MIT
+Plugin-License-Url: https://opensource.org/licenses/MIT
+Plugin-ScmConnection: scm:git:https://github.com/jenkinsci/mercurial-plu
+ gin.git
+Plugin-ScmTag: e69d2adb8abd34891efcb828b29c680fefea0328
+Plugin-ScmUrl: https://github.com/jenkinsci/mercurial-plugin
+Implementation-Build: e69d2adb8abd34891efcb828b29c680fefea0328
+
