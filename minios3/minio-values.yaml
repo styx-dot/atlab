@@ -17,5 +17,25 @@ persistence:
   enabled: true
   size: 20Gi
 
+
 ingress:
-  enabled: false
+  enabled: true
+  ingressClassName: traefik
+  hosts:
+    - api-s3.at-lab.lab
+  tls:
+    - secretName: wildcard-atlab-tls
+      hosts:
+        - api-s3.at-lab.lab
+
+consoleIngress:
+  enabled: true
+  ingressClassName: traefik
+  path: /
+  hosts:
+    - s3.at-lab.lab
+  tls:
+    - secretName: wildcard-atlab-tls
+      hosts:
+        - s3.at-lab.lab
+
